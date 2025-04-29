@@ -65,17 +65,15 @@ export interface AIDesignSuggestion {
   applyFunction: () => void;
 }
 
-// Add fabric.js type extensions
+// Updated type declarations for Fabric.js v6
 declare module 'fabric' {
-  namespace fabric {
-    interface Textbox {
-      fontSize?: number;
-      fontFamily?: string;
-      fontWeight?: string;
-      fontStyle?: string;
-      fill?: string | fabric.Pattern | fabric.Gradient;
-      backgroundColor?: string;
-      textAlign?: 'left' | 'center' | 'right' | 'justify';
-    }
+  export interface TextboxOptions {
+    fontSize?: number;
+    fontFamily?: string;
+    fontWeight?: string;
+    fontStyle?: string;
+    fill?: string | Record<string, unknown>; // For gradient or pattern
+    backgroundColor?: string;
+    textAlign?: 'left' | 'center' | 'right' | 'justify';
   }
 }

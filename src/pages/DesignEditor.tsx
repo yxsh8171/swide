@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import DesignNavbar from '@/components/DesignNavbar';
-import { Canvas, fabric, TEvent } from 'fabric';
+import { Canvas, Circle, Rect, Textbox, Image, Triangle } from 'fabric';
 import { DesignCanvas, DesignElement, DesignFormData } from '@/types/design';
 import { MoveRight } from 'lucide-react';
 
@@ -34,11 +34,11 @@ const colorPresets = [
 
 const DesignEditor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<fabric.Canvas | null>(null);
+  const fabricRef = useRef<Canvas | null>(null);
   const [activeTab, setActiveTab] = useState('text');
   const [designData, setDesignData] = useState<DesignFormData | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 1080, height: 1080 });
-  const [selectedElement, setSelectedElement] = useState<fabric.Object | null>(null);
+  const [selectedElement, setSelectedElement] = useState<any | null>(null);
   const [textOptions, setTextOptions] = useState({
     fontSize: 24,
     fontFamily: 'Arial',
@@ -52,7 +52,7 @@ const DesignEditor = () => {
   // Initialize fabric canvas
   useEffect(() => {
     if (canvasRef.current && !fabricRef.current) {
-      const canvas = new fabric.Canvas(canvasRef.current, {
+      const canvas = new Canvas(canvasRef.current, {
         width: canvasSize.width,
         height: canvasSize.height,
         backgroundColor: '#ffffff',
@@ -90,14 +90,14 @@ const DesignEditor = () => {
   }, []);
 
   // Handle selection change
-  const handleSelectionChange = (e: TEvent) => {
+  const handleSelectionChange = (e: any) => {
     const selectedObject = fabricRef.current?.getActiveObject();
     if (selectedObject) {
       setSelectedElement(selectedObject);
       
       // Update text options if text object is selected
-      if (selectedObject.type === 'textbox') {
-        const textbox = selectedObject as fabric.Textbox;
+      if (selectedObject instanceof Textbox) {
+        const textbox = selectedObject as Textbox;
         setTextOptions({
           fontSize: textbox.fontSize || 24,
           fontFamily: textbox.fontFamily || 'Arial',
@@ -112,7 +112,7 @@ const DesignEditor = () => {
   };
 
   // Generate design based on input data
-  const generateDesignFromData = (data: DesignFormData, canvas: fabric.Canvas) => {
+  const generateDesignFromData = (data: DesignFormData, canvas: Canvas) => {
     // Set canvas size based on design type
     let width = 1080;
     let height = 1080;
@@ -186,7 +186,7 @@ const DesignEditor = () => {
     
     // Create main text
     if (data.text) {
-      const mainText = new fabric.Textbox(data.text, {
+      const mainText = new Textbox(data.text, {
         left: width / 2,
         top: height / 2,
         originX: 'center',
@@ -203,7 +203,7 @@ const DesignEditor = () => {
     
     // Create emphasis/headline text if provided
     if (data.emphasis) {
-      const emphasisText = new fabric.Textbox(data.emphasis, {
+      const emphasisText = new Textbox(data.emphasis, {
         left: width / 2,
         top: height / 3,
         originX: 'center',
@@ -221,7 +221,7 @@ const DesignEditor = () => {
     // Add logo if provided
     if (data.logo) {
       const logoUrl = data.logo as unknown as string;
-      fabric.Image.fromURL(logoUrl, (img) => {
+      Image.fromURL(logoUrl, (img) => {
         // Scale logo to appropriate size
         const maxSize = Math.min(width, height) * 0.2;
         if (img.width && img.height) {
@@ -250,11 +250,11 @@ const DesignEditor = () => {
   };
 
   // Add decorative elements based on design tone
-  const addDecorativeElements = (canvas: fabric.Canvas, tone: string, width: number, height: number) => {
+  const addDecorativeElements = (canvas: Canvas, tone: string, width: number, height: number) => {
     switch (tone) {
       case 'professional':
         // Add a subtle line or shape
-        const professionalLine = new fabric.Rect({
+        const professionalLine = new Rect({
           left: width / 2,
           top: height * 0.8,
           originX: 'center',
@@ -269,7 +269,7 @@ const DesignEditor = () => {
       case 'playful':
         // Add some playful circles
         for (let i = 0; i < 5; i++) {
-          const circle = new fabric.Circle({
+          const circle = new Circle({
             left: Math.random() * width,
             top: Math.random() * height,
             radius: 15 + Math.random() * 30,
@@ -282,7 +282,7 @@ const DesignEditor = () => {
         
       case 'elegant':
         // Add an elegant decorative element
-        const elegantRect = new fabric.Rect({
+        const elegantRect = new Rect({
           left: width / 2,
           top: height * 0.2,
           originX: 'center',
@@ -293,7 +293,7 @@ const DesignEditor = () => {
         });
         canvas.add(elegantRect);
         
-        const elegantRect2 = new fabric.Rect({
+        const elegantRect2 = new Rect({
           left: width / 2,
           top: height * 0.75,
           originX: 'center',
@@ -307,7 +307,7 @@ const DesignEditor = () => {
         
       case 'bold':
         // Add a bold graphic element
-        const boldRect = new fabric.Rect({
+        const boldRect = new Rect({
           left: 0,
           top: 0,
           width: width * 0.3,
@@ -315,12 +315,12 @@ const DesignEditor = () => {
           fill: '#f43f5e',
         });
         canvas.add(boldRect);
-        canvas.sendBackwards(boldRect);
+        canvas.sendToBack(boldRect);
         break;
         
       case 'minimal':
         // Just add a subtle element
-        const minimalCircle = new fabric.Circle({
+        const minimalCircle = new Circle({
           left: width * 0.1,
           top: height * 0.1,
           radius: 20,
@@ -333,7 +333,7 @@ const DesignEditor = () => {
   };
 
   // Create a default design if no data is provided
-  const createDefaultDesign = (canvas: fabric.Canvas) => {
+  const createDefaultDesign = (canvas: Canvas) => {
     // Set default canvas size
     const width = 1080;
     const height = 1080;
@@ -344,7 +344,7 @@ const DesignEditor = () => {
     canvas.renderAll();
     
     // Add a welcome text
-    const welcomeText = new fabric.Textbox('Welcome to SwiftDesignForge', {
+    const welcomeText = new Textbox('Welcome to SwiftDesignForge', {
       left: width / 2,
       top: height / 3,
       originX: 'center',
@@ -359,7 +359,7 @@ const DesignEditor = () => {
     canvas.add(welcomeText);
     
     // Add a subtitle
-    const subtitleText = new fabric.Textbox('Create stunning designs from your text with AI', {
+    const subtitleText = new Textbox('Create stunning designs from your text with AI', {
       left: width / 2,
       top: height / 2,
       originX: 'center',
@@ -374,7 +374,7 @@ const DesignEditor = () => {
     canvas.add(subtitleText);
     
     // Add instruction
-    const instructionText = new fabric.Textbox('Click on any element to edit it, or add new elements using the toolbar', {
+    const instructionText = new Textbox('Click on any element to edit it, or add new elements using the toolbar', {
       left: width / 2,
       top: height * 0.7,
       originX: 'center',
@@ -395,7 +395,7 @@ const DesignEditor = () => {
   const addNewText = () => {
     if (!fabricRef.current) return;
     
-    const text = new fabric.Textbox('Double-click to edit', {
+    const text = new Textbox('Double-click to edit', {
       left: canvasSize.width / 2,
       top: canvasSize.height / 2,
       originX: 'center',
@@ -421,7 +421,7 @@ const DesignEditor = () => {
     
     switch (type) {
       case 'circle':
-        shape = new fabric.Circle({
+        shape = new Circle({
           left: canvasSize.width / 2,
           top: canvasSize.height / 2,
           originX: 'center',
@@ -431,7 +431,7 @@ const DesignEditor = () => {
         });
         break;
       case 'rectangle':
-        shape = new fabric.Rect({
+        shape = new Rect({
           left: canvasSize.width / 2,
           top: canvasSize.height / 2,
           originX: 'center',
@@ -442,7 +442,7 @@ const DesignEditor = () => {
         });
         break;
       case 'triangle':
-        shape = new fabric.Triangle({
+        shape = new Triangle({
           left: canvasSize.width / 2,
           top: canvasSize.height / 2,
           originX: 'center',
@@ -540,7 +540,7 @@ const DesignEditor = () => {
                 Add New Text
               </Button>
               
-              {selectedElement && selectedElement.type === 'textbox' && (
+              {selectedElement && selectedElement instanceof Textbox && (
                 <div className="space-y-4 pt-4 border-t">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Font Size</label>
@@ -665,7 +665,7 @@ const DesignEditor = () => {
                 </Button>
               </div>
               
-              {selectedElement && (selectedElement.type !== 'textbox') && (
+              {selectedElement && !(selectedElement instanceof Textbox) && (
                 <div className="space-y-4 pt-4 border-t">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Fill Color</label>
@@ -708,7 +708,7 @@ const DesignEditor = () => {
                       const reader = new FileReader();
                       reader.onload = (event) => {
                         if (event.target?.result) {
-                          fabric.Image.fromURL(event.target.result as string, (img) => {
+                          Image.fromURL(event.target.result as string, (img) => {
                             // Scale image to fit in canvas
                             const maxSize = Math.min(canvasSize.width, canvasSize.height) * 0.5;
                             if (img.width && img.height) {
