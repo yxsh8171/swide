@@ -1,33 +1,57 @@
 
-export type DesignType = 'poster' | 'banner' | 'social' | 'card' | 'custom';
+import { Canvas } from 'fabric';
+
+export type DesignType = 'social' | 'banner' | 'poster' | 'card';
 export type DesignTone = 'professional' | 'playful' | 'elegant' | 'bold' | 'minimal';
 export type TextAlignment = 'left' | 'center' | 'right';
 
-export interface DesignElement {
+export interface DesignFormData {
+  type: DesignType;
+  tone: DesignTone;
+  text: string;
+  emphasis?: string;
+  logo?: File | string;
+}
+
+export interface DesignElementBase {
   id: string;
-  type: 'text' | 'image' | 'shape' | 'background';
+  type: string;
   x: number;
   y: number;
   width: number;
   height: number;
   rotation: number;
-  content?: string;
-  style?: {
-    fontSize?: number;
-    fontFamily?: string;
-    fontWeight?: string;
-    color?: string;
-    backgroundColor?: string;
-    textAlign?: TextAlignment;
-    opacity?: number;
-    borderRadius?: number;
-    padding?: number;
-    lineHeight?: number;
-    letterSpacing?: number;
-    [key: string]: any;
-  };
-  src?: string;
+  locked: boolean;
 }
+
+export interface TextElement extends DesignElementBase {
+  type: 'text';
+  content: string;
+  fontSize: number;
+  fontFamily: string;
+  color: string;
+  backgroundColor: string;
+  textAlign: TextAlignment;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+}
+
+export interface ShapeElement extends DesignElementBase {
+  type: 'shape';
+  shapeType: 'rectangle' | 'circle' | 'triangle';
+  fillColor: string;
+  strokeColor: string;
+  strokeWidth: number;
+}
+
+export interface ImageElement extends DesignElementBase {
+  type: 'image';
+  src: string;
+  objectFit: 'cover' | 'contain';
+}
+
+export type DesignElement = TextElement | ShapeElement | ImageElement;
 
 export interface DesignCanvas {
   id: string;
@@ -36,52 +60,30 @@ export interface DesignCanvas {
   height: number;
   backgroundColor: string;
   elements: DesignElement[];
-  type: DesignType;
-  tone: DesignTone;
+  created: Date;
+  lastModified: Date;
 }
 
-export interface DesignFormData {
-  type: DesignType;
-  tone: DesignTone;
-  text: string;
-  emphasis: string;
-  logo?: File | null;
-}
-
-export interface DesignTemplate {
+export interface DesignProject {
   id: string;
   name: string;
-  type: DesignType;
-  tone: DesignTone;
-  thumbnail: string;
-}
-
-export interface AIDesignSuggestion {
-  id: string;
-  type: 'color' | 'font' | 'layout' | 'element';
-  title: string;
   description: string;
-  preview?: string;
-  applyFunction: () => void;
+  canvases: DesignCanvas[];
+  created: Date;
+  lastModified: Date;
 }
 
-// Updated type declarations for Fabric.js v6
-// These declare just what we need for our current implementation
-declare module 'fabric' {
-  export interface TextboxOptions {
-    fontSize?: number;
-    fontFamily?: string;
-    fontWeight?: string;
-    fontStyle?: string;
-    fill?: string;
-    backgroundColor?: string;
-    textAlign?: 'left' | 'center' | 'right' | 'justify';
-  }
+// These interfaces help with Fabric.js typings
+export interface CanvasObject extends fabric.Object {
+  id: string;
+  type: string;
+  toObject(): any;
+}
 
-  export interface TDataUrlOptions {
-    format?: string;
-    quality?: number;
-    multiplier: number;
-    enableRetinaScaling?: boolean;
-  }
+// Export options for Fabric.js canvas
+export interface TDataUrlOptions {
+  format?: string;
+  quality?: number;
+  multiplier: number;
+  enableRetinaScaling?: boolean;
 }

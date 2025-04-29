@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect } from 'react';
 import { Canvas, Textbox, Circle, Rect, Triangle, Image as FabricImage } from 'fabric';
 import { DesignFormData, TextAlignment } from '@/types/design';
@@ -296,10 +295,9 @@ export const useDesignCanvas = () => {
           fill: '#f43f5e',
         });
         canvas.add(boldRect);
-        // Move rectangle to back
-        if (boldRect._objects && boldRect._objects.length > 0) {
-          boldRect.moveTo(0);
-        }
+        
+        // Send rectangle to back
+        canvas.sendObjectToBack(boldRect);
         break;
         
       case 'minimal':
