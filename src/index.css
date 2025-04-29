@@ -5,38 +5,6 @@
 
 @layer base {
   :root {
-    --background: 240 100% 99%;
-    --foreground: 240 10% 3.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 252 87% 64%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 252 87% 64%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
@@ -47,7 +15,7 @@
     --popover-foreground: 0 0% 98%;
 
     --primary: 252 87% 64%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -64,6 +32,8 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 252 87% 64%;
+
+    --radius: 0.5rem;
   }
 }
 
@@ -134,3 +104,28 @@
 .handle-ne { top: -4px; right: -4px; cursor: nesw-resize; }
 .handle-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
 .handle-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+
+/* Custom styles for modern dark theme */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-purple-500;
+}
+
+.purple-glow {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+}
+
+.service-item {
+  @apply flex items-start gap-6 bg-secondary/30 p-6 hover:bg-secondary/50 transition-all duration-300 cursor-pointer;
+}
+
+.faq-item {
+  @apply border-b border-white/10 py-4 cursor-pointer;
+}
+
+.faq-question {
+  @apply flex justify-between items-center text-lg font-medium py-2;
+}
+
+.faq-answer {
+  @apply text-muted-foreground pb-4;
+}

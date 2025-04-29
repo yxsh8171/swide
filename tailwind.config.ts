@@ -73,6 +73,9 @@ export default {
 					'gradient-end': '#ec4899',
 				}
 			},
+			backgroundImage: {
+				'hero-gradient': 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3), rgba(0, 0, 0, 0) 65%)',
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
