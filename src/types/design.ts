@@ -64,3 +64,18 @@ export interface AIDesignSuggestion {
   preview?: string;
   applyFunction: () => void;
 }
+
+// Add fabric.js type extensions
+declare module 'fabric' {
+  namespace fabric {
+    interface Textbox {
+      fontSize?: number;
+      fontFamily?: string;
+      fontWeight?: string;
+      fontStyle?: string;
+      fill?: string | fabric.Pattern | fabric.Gradient;
+      backgroundColor?: string;
+      textAlign?: 'left' | 'center' | 'right' | 'justify';
+    }
+  }
+}

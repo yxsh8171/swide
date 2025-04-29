@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import DesignNavbar from '@/components/DesignNavbar';
-import { Canvas, IEvent, TextboxOptions, loadSVGFromURL } from 'fabric';
+import { Canvas, fabric, TEvent } from 'fabric';
 import { DesignCanvas, DesignElement, DesignFormData } from '@/types/design';
 import { MoveRight } from 'lucide-react';
 
@@ -35,11 +34,11 @@ const colorPresets = [
 
 const DesignEditor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<Canvas | null>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
   const [activeTab, setActiveTab] = useState('text');
   const [designData, setDesignData] = useState<DesignFormData | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 1080, height: 1080 });
-  const [selectedElement, setSelectedElement] = useState<any>(null);
+  const [selectedElement, setSelectedElement] = useState<fabric.Object | null>(null);
   const [textOptions, setTextOptions] = useState({
     fontSize: 24,
     fontFamily: 'Arial',
@@ -53,7 +52,7 @@ const DesignEditor = () => {
   // Initialize fabric canvas
   useEffect(() => {
     if (canvasRef.current && !fabricRef.current) {
-      const canvas = new Canvas(canvasRef.current, {
+      const canvas = new fabric.Canvas(canvasRef.current, {
         width: canvasSize.width,
         height: canvasSize.height,
         backgroundColor: '#ffffff',
@@ -91,28 +90,29 @@ const DesignEditor = () => {
   }, []);
 
   // Handle selection change
-  const handleSelectionChange = (e: IEvent) => {
+  const handleSelectionChange = (e: TEvent) => {
     const selectedObject = fabricRef.current?.getActiveObject();
     if (selectedObject) {
       setSelectedElement(selectedObject);
       
       // Update text options if text object is selected
       if (selectedObject.type === 'textbox') {
+        const textbox = selectedObject as fabric.Textbox;
         setTextOptions({
-          fontSize: selectedObject.fontSize || 24,
-          fontFamily: selectedObject.fontFamily || 'Arial',
-          color: selectedObject.fill || '#000000',
-          backgroundColor: selectedObject.backgroundColor || 'transparent',
-          textAlign: (selectedObject.textAlign as 'left' | 'center' | 'right') || 'center',
-          bold: selectedObject.fontWeight === 'bold',
-          italic: selectedObject.fontStyle === 'italic',
+          fontSize: textbox.fontSize || 24,
+          fontFamily: textbox.fontFamily || 'Arial',
+          color: textbox.fill?.toString() || '#000000',
+          backgroundColor: textbox.backgroundColor || 'transparent',
+          textAlign: (textbox.textAlign as 'left' | 'center' | 'right') || 'center',
+          bold: textbox.fontWeight === 'bold',
+          italic: textbox.fontStyle === 'italic',
         });
       }
     }
   };
 
   // Generate design based on input data
-  const generateDesignFromData = (data: DesignFormData, canvas: Canvas) => {
+  const generateDesignFromData = (data: DesignFormData, canvas: fabric.Canvas) => {
     // Set canvas size based on design type
     let width = 1080;
     let height = 1080;
@@ -159,7 +159,8 @@ const DesignEditor = () => {
         bgColor = '#ffffff';
         break;
     }
-    canvas.setBackgroundColor(bgColor, canvas.renderAll.bind(canvas));
+    canvas.backgroundColor = bgColor;
+    canvas.renderAll();
     
     // Generate text elements
     let textColor = data.tone === 'bold' ? '#ffffff' : '#1a1a1a';
@@ -219,7 +220,8 @@ const DesignEditor = () => {
     
     // Add logo if provided
     if (data.logo) {
-      fabric.Image.fromURL(data.logo as unknown as string, (img) => {
+      const logoUrl = data.logo as unknown as string;
+      fabric.Image.fromURL(logoUrl, (img) => {
         // Scale logo to appropriate size
         const maxSize = Math.min(width, height) * 0.2;
         if (img.width && img.height) {
@@ -248,7 +250,7 @@ const DesignEditor = () => {
   };
 
   // Add decorative elements based on design tone
-  const addDecorativeElements = (canvas: Canvas, tone: string, width: number, height: number) => {
+  const addDecorativeElements = (canvas: fabric.Canvas, tone: string, width: number, height: number) => {
     switch (tone) {
       case 'professional':
         // Add a subtle line or shape
@@ -313,7 +315,7 @@ const DesignEditor = () => {
           fill: '#f43f5e',
         });
         canvas.add(boldRect);
-        canvas.sendToBack(boldRect);
+        canvas.sendBackwards(boldRect);
         break;
         
       case 'minimal':
@@ -331,14 +333,15 @@ const DesignEditor = () => {
   };
 
   // Create a default design if no data is provided
-  const createDefaultDesign = (canvas: Canvas) => {
+  const createDefaultDesign = (canvas: fabric.Canvas) => {
     // Set default canvas size
     const width = 1080;
     const height = 1080;
     setCanvasSize({ width, height });
     canvas.setWidth(width);
     canvas.setHeight(height);
-    canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+    canvas.backgroundColor = '#ffffff';
+    canvas.renderAll();
     
     // Add a welcome text
     const welcomeText = new fabric.Textbox('Welcome to SwiftDesignForge', {
@@ -500,7 +503,7 @@ const DesignEditor = () => {
   };
 
   // Export canvas as image
-  const exportDesign = (format: 'png' | 'jpg') => {
+  const exportDesign = (format: 'png' | 'jpeg') => {
     if (!fabricRef.current) return;
     
     const dataUrl = fabricRef.current.toDataURL({
@@ -765,10 +768,10 @@ const DesignEditor = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => exportDesign('jpg')}
+                onClick={() => exportDesign('jpeg')}
                 className="flex-1"
               >
-                JPG
+                JPEG
               </Button>
             </div>
           </div>
