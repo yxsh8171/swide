@@ -24,6 +24,7 @@ interface EditorSidebarProps {
   deleteSelectedElement: () => void;
   addImageFromFile: (file: File) => void;
   exportDesign: (format: 'png' | 'jpeg') => void;
+  fabricRef: React.MutableRefObject<any>;
 }
 
 const EditorSidebar: React.FC<EditorSidebarProps> = ({
@@ -37,7 +38,8 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({
   selectedElement,
   deleteSelectedElement,
   addImageFromFile,
-  exportDesign
+  exportDesign,
+  fabricRef
 }) => {
   return (
     <div className="w-64 h-full border-r bg-white flex flex-col">
@@ -76,6 +78,7 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({
           {activeTool === 'text' && (
             <TextToolbar 
               textOptions={textOptions} 
+              setTextOptions={setTextOptions}
               updateTextProperty={updateTextProperty} 
               addNewText={addNewText} 
               selectedElement={selectedElement}

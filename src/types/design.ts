@@ -74,7 +74,7 @@ export interface DesignProject {
 }
 
 // These interfaces help with Fabric.js typings
-export interface CanvasObject extends fabric.Object {
+export interface CanvasObject {
   id: string;
   type: string;
   toObject(): any;

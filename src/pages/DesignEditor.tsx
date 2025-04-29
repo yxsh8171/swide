@@ -7,7 +7,7 @@ import CanvasArea from '@/components/designer/CanvasArea';
 import SuggestionPanel from '@/components/designer/SuggestionPanel';
 
 const DesignEditor = () => {
-  const [activeTab, setActiveTab] = useState('text');
+  const [activeTool, setActiveTool] = useState('text');
   
   const {
     canvasRef,
@@ -31,8 +31,8 @@ const DesignEditor = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar - editing tools */}
         <EditorSidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
           selectedElement={selectedElement}
           textOptions={textOptions}
           setTextOptions={setTextOptions}
