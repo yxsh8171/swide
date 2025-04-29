@@ -66,14 +66,22 @@ export interface AIDesignSuggestion {
 }
 
 // Updated type declarations for Fabric.js v6
+// These declare just what we need for our current implementation
 declare module 'fabric' {
   export interface TextboxOptions {
     fontSize?: number;
     fontFamily?: string;
     fontWeight?: string;
     fontStyle?: string;
-    fill?: string | Record<string, unknown>; // For gradient or pattern
+    fill?: string;
     backgroundColor?: string;
     textAlign?: 'left' | 'center' | 'right' | 'justify';
+  }
+
+  export interface TDataUrlOptions {
+    format?: string;
+    quality?: number;
+    multiplier: number;
+    enableRetinaScaling?: boolean;
   }
 }

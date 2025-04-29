@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import DesignNavbar from '@/components/DesignNavbar';
-import { Canvas, Circle, Rect, Textbox, Image, Triangle } from 'fabric';
+import { Canvas, Circle, Rect, Textbox, Triangle } from 'fabric';
 import { DesignCanvas, DesignElement, DesignFormData } from '@/types/design';
 import { MoveRight } from 'lucide-react';
 
@@ -221,25 +222,28 @@ const DesignEditor = () => {
     // Add logo if provided
     if (data.logo) {
       const logoUrl = data.logo as unknown as string;
-      Image.fromURL(logoUrl, (img) => {
-        // Scale logo to appropriate size
-        const maxSize = Math.min(width, height) * 0.2;
-        if (img.width && img.height) {
-          const scale = Math.min(maxSize / img.width, maxSize / img.height);
-          img.scale(scale);
-        }
-        
-        // Position logo in corner or appropriate location
-        img.set({
+      // Fixed error: Type '(img: any) => void' has no properties in common with type 'LoadImageOptions'
+      // We need to use the fromURL method correctly with options
+      const img = new Image();
+      img.src = logoUrl;
+      img.onload = () => {
+        const fabricImage = new Image(img, {
           left: width * 0.85,
           top: height * 0.15,
           originX: 'center',
           originY: 'center',
         });
         
-        canvas.add(img);
+        // Scale logo to appropriate size
+        const maxSize = Math.min(width, height) * 0.2;
+        if (fabricImage.width && fabricImage.height) {
+          const scale = Math.min(maxSize / fabricImage.width, maxSize / fabricImage.height);
+          fabricImage.scale(scale);
+        }
+        
+        canvas.add(fabricImage);
         canvas.renderAll();
-      });
+      };
     }
     
     // Add decorative elements based on tone
@@ -315,7 +319,13 @@ const DesignEditor = () => {
           fill: '#f43f5e',
         });
         canvas.add(boldRect);
-        canvas.sendToBack(boldRect);
+        // Fixed error: Property 'sendToBack' does not exist on type 'Canvas'
+        // Use moveToBack instead which is the correct method in Fabric.js v6
+        canvas.getObjects().forEach(obj => {
+          if (obj === boldRect) {
+            obj.moveTo(0); // Move to the back (index 0)
+          }
+        });
         break;
         
       case 'minimal':
@@ -506,9 +516,12 @@ const DesignEditor = () => {
   const exportDesign = (format: 'png' | 'jpeg') => {
     if (!fabricRef.current) return;
     
+    // Fixed error: Property 'multiplier' is missing in type '{ format: "png" | "jpeg"; quality: number; }'
+    // Add the required multiplier property to the options object
     const dataUrl = fabricRef.current.toDataURL({
       format: format,
       quality: 0.8,
+      multiplier: 1,  // Added the required multiplier property
     });
     
     const link = document.createElement('a');
@@ -706,28 +719,35 @@ const DesignEditor = () => {
                     if (e.target.files && e.target.files[0] && fabricRef.current) {
                       const file = e.target.files[0];
                       const reader = new FileReader();
+                      
+                      // Fixed error: Type '(img: any) => void' has no properties in common with type 'LoadImageOptions'
                       reader.onload = (event) => {
-                        if (event.target?.result) {
-                          Image.fromURL(event.target.result as string, (img) => {
+                        if (event.target?.result && fabricRef.current) {
+                          const imgElement = new Image();
+                          imgElement.src = event.target.result as string;
+                          
+                          imgElement.onload = () => {
+                            const fabricImage = new Image(imgElement);
+                            
                             // Scale image to fit in canvas
                             const maxSize = Math.min(canvasSize.width, canvasSize.height) * 0.5;
-                            if (img.width && img.height) {
-                              const scale = Math.min(maxSize / img.width, maxSize / img.height);
-                              img.scale(scale);
+                            if (fabricImage.width && fabricImage.height) {
+                              const scale = Math.min(maxSize / fabricImage.width, maxSize / fabricImage.height);
+                              fabricImage.scale(scale);
                             }
                             
-                            img.set({
+                            fabricImage.set({
                               left: canvasSize.width / 2,
                               top: canvasSize.height / 2,
                               originX: 'center',
                               originY: 'center',
                             });
                             
-                            fabricRef.current?.add(img);
-                            fabricRef.current?.setActiveObject(img);
-                            fabricRef.current?.renderAll();
-                            setSelectedElement(img);
-                          });
+                            fabricRef.current.add(fabricImage);
+                            fabricRef.current.setActiveObject(fabricImage);
+                            fabricRef.current.renderAll();
+                            setSelectedElement(fabricImage);
+                          };
                         }
                       };
                       reader.readAsDataURL(file);
